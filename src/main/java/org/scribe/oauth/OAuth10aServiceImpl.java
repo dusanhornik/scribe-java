@@ -1,11 +1,18 @@
 package org.scribe.oauth;
 
-import java.util.*;
-
-import org.scribe.builder.api.*;
-import org.scribe.model.*;
-import org.scribe.utils.*;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.scribe.builder.api.DefaultApi10a;
+import org.scribe.model.OAuthConfig;
+import org.scribe.model.OAuthConstants;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Request;
+import org.scribe.model.RequestTuner;
+import org.scribe.model.Response;
+import org.scribe.model.Token;
+import org.scribe.model.Verifier;
+import org.scribe.utils.MapUtils;
 
 /**
  * OAuth 1.0a implementation of {@link OAuthService}
@@ -16,8 +23,8 @@ public class OAuth10aServiceImpl implements OAuthService
 {
   private static final String VERSION = "1.0";
 
-  private OAuthConfig config;
-  private DefaultApi10a api;
+  private final OAuthConfig config;
+  private final DefaultApi10a api;
 
   /**
    * Default constructor
@@ -99,8 +106,13 @@ public class OAuth10aServiceImpl implements OAuthService
     config.log("setting token to: " + requestToken + " and verifier to: " + verifier);
     addOAuthParams(request, requestToken);
     appendSignature(request);
+    config.log("Sending request for access_token ... " + request.getUrl());
     Response response = request.send(tuner);
-    return api.getAccessTokenExtractor().extract(response.getBody());
+    config.log("Response for access_code status code: " + response.getCode());
+    String body = response.getBody();
+    config.log("Response for access_code body: " + body);
+    
+    return api.getAccessTokenExtractor().extract(body);
   }
 
   /**
